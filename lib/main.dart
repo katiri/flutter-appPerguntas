@@ -1,7 +1,9 @@
 // ignore_for_file: prefer_const_constructors, avoid_print
 
 import 'package:app_perguntas/questao.dart';
+import 'package:app_perguntas/questionario.dart';
 import 'package:app_perguntas/resposta.dart';
+import 'package:app_perguntas/resultado.dart';
 import 'package:flutter/material.dart';
 
 // main(){
@@ -10,7 +12,7 @@ import 'package:flutter/material.dart';
 
 main() => runApp(PerguntaApp());
 
-class PerguntaApp extends StatefulWidget{
+class PerguntaApp extends StatefulWidget {
   PerguntaApp({Key? key}) : super(key: key);
 
   @override
@@ -19,56 +21,76 @@ class PerguntaApp extends StatefulWidget{
 
 class _PerguntaAppState extends State<PerguntaApp> {
   int _perguntaSelecionada = 0;
+  int _pontuacao = 0;
 
-  final List<Map<String, Object>> perguntas = [
+  final List<Map<String, Object>> _perguntas = const [
     {
       'texto': 'Qual sua cor favorita?',
-      'respostas': ['Azul', 'Vermelho', 'Verde']
+      'respostas': [
+        {'texto': 'Azul', 'nota': 5},
+        {'texto': 'Vermelho', 'nota': 10},
+        {'texto': 'Verde', 'nota': 0},
+      ]
     },
     {
       'texto': 'Qual o seu animal favorito?',
-      'respostas': ['Cavalo', 'Cachorro', 'Papagaio']
+      'respostas': [
+        {'texto': 'Gato', 'nota': 0},
+        {'texto': 'Cachorro', 'nota': 5},
+        {'texto': 'Papagaio', 'nota': 10},
+      ]
     },
     {
       'texto': 'Qual o seu instrutor favorito?',
-      'respostas': ['João', 'Bia', 'Maria']
+      'respostas': [
+        {'texto': 'João', 'nota': 10},
+        {'texto': 'Bia', 'nota': 5},
+        {'texto': 'Maria', 'nota': 0},
+      ]
     }
   ];
 
-  void _responder(){
-    if((_perguntaSelecionada + 1) < perguntas.length){
+  void _responder(int nota) {
+    if (temPerguntaSelecionada) {
       setState(() {
         _perguntaSelecionada++;
+        _pontuacao += nota;
       });
     }
-    print(_perguntaSelecionada);
+    print(_pontuacao);
+  }
+
+  void _reiniciar(){
+    setState(() {
+      _perguntaSelecionada = 0;
+      _pontuacao = 0;
+    });
+  }
+
+  bool get temPerguntaSelecionada {
+    return _perguntaSelecionada < _perguntas.length;
   }
 
   @override
-  Widget build(BuildContext context){
-    
-    List<String> respostas = perguntas[_perguntaSelecionada].cast()['respostas'];
-    // for(String textoResposta in respostas){
-    //   widgets.add(Resposta(textoResposta, _responder));
-    // }
-    List<Widget> widgets = respostas.map((textoResposta) => Resposta(textoResposta, _responder)).toList();
-
-
+  Widget build(BuildContext context) {
     return MaterialApp(
       // home: Text('Olá mundo!'),
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('App de perguntas'),
+          appBar: AppBar(
+            title: const Text('App de perguntas'),
+          ),
+          // body: const Text('Olá Flutter!'),
+          body: temPerguntaSelecionada
+              ? Questionario(
+                  perguntaSelecionada: _perguntaSelecionada,
+                  perguntas: _perguntas,
+                  responder: _responder,
+                )
+              : Resultado(
+                pontuacao: _pontuacao,
+                reiniciar: _reiniciar,
+              )
         ),
-        // body: const Text('Olá Flutter!'),
-        body: Column(
-          children: <Widget> [
-            Questao(perguntas[_perguntaSelecionada]['texto'].toString()),
-            // O ... pega os elementos da lista respostas e joga dentro da lista atual
-            ...widgets,
-          ],
-        ),
-      ),
     );
   }
 }
